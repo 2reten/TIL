@@ -9,3 +9,8 @@ git config --global user.email <email>
 
 ## 명령어
 - `git init`
+    - `.git` repository를 생성하는 명령어
+
+- `git add .`
+
+- `git commit -m "first commit`
