@@ -225,3 +225,167 @@ lr_clf.predict_proba(X_test)[:,1]
 ```
 - 이 코드는 오늘 마지막에 배운 로지스틱 회귀를 사용해본 코드다.
     - 마지막에 predict_proba는 그 값에 대한 확률을 출력하는 코드다.
+
+# LGBM, SMOTE, AUC
+```python
+pip install lightgbm
+from lightgbm import LGBMClassifier
+lgbm_clf = LGBMClassifier(n_estimators = 1000, num_leaves = 64, boost_from_average = False)
+```
+- 어제에 이어서 같은 데이터셋으로 LGBM기법을 사용했다.
+    - 여기서 boost_from_average는 데이터가 불균형하게 분포되어 있는 경우 false를 입력해준다.
+
+```python
+lgbm_clf.fit(X_train, y_train)
+pred = lgbm_clf.predict(X_test)
+lgbm_clf.predict_proba(X_test)
+X_train.describe()
+```
+- 모델을 훈련시키고 test 데이터로 값을 예측했다.
+    - proba를 이용해서 퍼센트로도 나타냈다.
+- X_train에 대한 기술통계 출력
+
+```python
+q25 = np.percentile(X_train["V1"].values, 25)
+q75 = np.percentile(X_train["V1"].values, 75)
+iqr = q75 - q25
+iqr15 = iqr * 1.5
+lowest_val = q25 - iqr15 # 하한 바운더리
+highest_val = q75 + iqr15 # 상한 바운더리
+X_train["V1"][(X_train["V1"] < lowest_val) | (X_train["V1"] > highest_val)].index
+```
+- 우수한 모델이 되려면 이상치를 제거하는 방법과 표준화를 하는 방법이 있다.
+    - 이것은 이상치를 제거하는 과정이다.
+
+# SMOTE 오버 샘플링
+```python
+pip install -U imbalanced_learn
+from imblearn.over_sampling import SMOTE
+smote = SMOTE(random_state = 0)
+```
+- 모듈을 다운하고 모델까지 생성하는 과정이다.
+
+```python
+X_train_over, y_train_over = smote.fit_resample(X_train, y_train)
+pd.Series(y_train_over).value_counts()
+```
+- 모델을 훈련시키고 그 값의 value를 파악했더니 값이 같은 수로 나타났다.
+
+```python
+lr_clf = LogisticRegression()
+lr_clf.fit(X_train_over, y_train_over)
+lr_clf.predict(X_test)
+```
+- LogisticRegression을 이용해서 모델을 훈련시키고 그 x_test의 값을 예측했다.
+
+```python
+import numpy as np
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+```
+- 추가로 사용한 모듈들이다.
+
+```Python
+cancer_data = load_breast_cancer()
+X_data = cancer_data.data
+y_label = cancer_data.target
+X_train, X_test, y_train, y_test = train_test_split(X_data, y_label, test_size = 0.2,
+                                                    random_state = 20231024)
+knn_clf = KNeighborsClassifier(n_neighbors = 5)
+rf_clf = RandomForestClassifier(n_estimators = 100, random_state = 42 )
+dt_clf = DecisionTreeClassifier()
+ada_clf = AdaBoostClassifier(n_estimators = 100)
+```
+- 스태킹 과정이다. 이 과정을 통해 각각의 모듈들로 얻은 예측값을 하나의 데이터로 만들어 모델을 훈련시키고 답을 추측하는 방법이다.
+
+```python
+knn_clf.fit(X_train, y_train)
+rf_clf.fit(X_train, y_train)
+dt_clf.fit(X_train, y_train)
+ada_clf.fit(X_train, y_train)
+knn_pred = knn_clf.predict(X_test)
+rf_pred = rf_clf.predict(X_test)
+dt_pred = dt_clf.predict(X_test)
+ada_pred = ada_clf.predict(X_test)
+print(accuracy_score(y_test, knn_pred)) #0.9298245614035088
+print(accuracy_score(y_test, rf_pred)) #0.9473684210526315
+print(accuracy_score(y_test, dt_pred)) #0.9298245614035088
+print(accuracy_score(y_test, ada_pred)) #0.9736842105263158
+```
+- 각각의 모델들을 생성하고 예측해보고 그 값의 정확도를 맞춰보았다. 가장 높은 정확도를 보인것은 adaboost였다.
+
+```python
+pred = np.array([knn_pred, rf_pred, dt_pred, ada_pred])
+pred = np.transpose(pred)
+lr_final = LogisticRegression()
+lr_final.fit(pred, y_test)
+final = lr_final.predict(pred)
+accuracy_score(final, y_test)
+```
+- 그 모델들로 나온 값들을 array로 만들고 그 값을 transpose를 이용해서 열과 행을 변환, 그리고 그 값을 로지스틱 회귀 모델에 넣어 훈련을 시키고 값을 예측했다.
+
+```python
+"""
+# Association Rule
+Itemset = 항목 집합 ex) 1itemset = {milk}, 3itemset = {milk, bred, diaper}
+Supprt count = itemset의 빈도수
+Support = 항목집합의 빈도수를 전체 거래수로 나눈것, 지지도 라고도 불린다.
+(x와 y를 모두 포함하는 집합의 수) / (전체 거래수)
+Frequent itemset = 빈발 항목 집합. 최소 지지도(minimum support threshold(minsup)) 이상에 
+해당하는 항목 집합을 빈발 항목 집합이라고 한다.
+ex) mnsup을 2라고 설정했다면 2와 같거나 더 큰 빈도수를 가진 항목집합이 빈발 항목 집합이 된다.
+Confidence = 신뢰도라고 불린다.(x와 y를 모두 포함하는 집합의 수) / (x의 값을 모두 가진 집합 수)
+x라는 상품을 포함하는 거래의 집합중에 y도 포함하고 있는 거래가 얼마나 빈번히 발생하는 지에 대한 척도
+연관 분석이 필요한 이유? 대용량 데이터베이스에서 기존에는 발견할 수 없었던
+아이템간의 관계를 발견할 수 있다는 장점이 있기 때문이다. -> 마케팅 전략을 세울 수 있다.
+고객들이 방문한 웹 페이지들이 있다면 그 페이지들의 관계를 바탕으로 웹페이지를 추천이 가능하다.
+Association Rule을 찾는 과정
+일단 minsup를 직접 설정해야 함.(잘 설정해야된다.) -> 이 minsup의 값을 만족하는 규칙 내에서 연관규칙을 찾기 때문이다.
+그렇게 만들어진 아이템 집합으로 높은 confidence를 가지는 룰을 생성한다.
+3**d - 2**(d+1) +1 = 규칙 수 공식
+if d = 6 => 729 - 128 + 1 = 602
+Apriori = 전체 생성 가능한 룰들 중에서 생성 가능한 룰의 수를 최소로 하기 위한 방법
+지지도를 만족한다면 빈발 항목 집합, 만족하지 못한다면 비빈발 항목 집합이라고 한다.
+Leverage = 0에 가깝다면, 두 상품은 독립이고, 0보다 크다면, 향상도가 1보다 큰 경우, 두 상품은 연관있다.
+Conviction = conviction이 1이면 서로 관련없다. conviction이 1보다 크다면 x가 주어졌을 경우 
+y가 발생 하지 않는 경우가 x를 고려하지 않았을 경우보다 줄어들었다는것을 의미한다.
+반대로 말하면 x가 y의 발생여부를 예측하는데 유용한 품목이 되는것이다. 
+비슷한 논리로 conviction이 1보다 작으면 x는 y의 발생 여부를 예측하는데 유용하지 않은 품목이 되는 것이다.
+순차분석 = 어떤것을 먼저 사고 어떤것을 나중에 사는지를 분석 -> 시간과 순서를 고려
+"""
+```
+- 오후에 배운 이론이다.
+
+```python
+dataset=[['사과','치즈','생수'],
+['생수','호두','치즈','고등어'],
+['수박','사과','생수'],
+['생수','호두','치즈','옥수수']]
+pip install mlxtend
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+```
+- 사용할 모듈과 데이터 셋이다.
+
+```python
+te = TransactionEncoder()
+te_ary = te.fit(dataset).transform(dataset)
+df = pd.DataFrame(te_ary, columns = te.columns_)
+```
+- TransactionEncoder를 만들고 훈련시켰다. 그리고 그 값을 transform을 이용해서 true와 false로 출력한 뒤 그 값을 데이터프레임화 columns는 그 값의 이름들을 사용했다.
+
+```python
+freq_itemsets = apriori(df, min_support=0.5, use_colnames=True)
+res = association_rules(freq_itemsets, metric = "lift")
+res[res["lift"] > 1]
+```
+- 지지도가 0.5이상인 값만을 남기고
