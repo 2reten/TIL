@@ -388,7 +388,8 @@ freq_itemsets = apriori(df, min_support=0.5, use_colnames=True)
 res = association_rules(freq_itemsets, metric = "lift")
 res[res["lift"] > 1]
 ```
-- 지지도가 0.5이상인 값만을 남기고
+- 지지도가 0.5이상인 값만을 남기고 colnames를 이용해서 각 데이터에 이름을 표시했다.
+    - association_rules를 이용해서 각 신뢰도, 지지도, 향상도 등을 확인하고, 향상도가 1 이상인 값만을 출력했다.
 
 ```python
 dataset = [['Milk', 'Onion', 'Nutmeg', 'Eggs', 'Yogurt'],
@@ -404,12 +405,12 @@ freq_itemsets = apriori(df, min_support=0.4, use_colnames=True)
 res = association_rules(freq_itemsets, metric = "lift")
 res[res["lift"] < 1]
 ```
-```python
-minsup의 값을 0.2로 하면 많은 데이터가 출력돼 0.4로 조정
--> 지지도가 0.4였던 corn은 향상도가 1을 넘지 못해 출력되지 않았다.
-Milk가 들어간 빈발 항목 집합은 모두 향상도가 1에 가까운 수치를 출력했고 
-향상도의 수치가 높은 목록들은 "Onion","Eggs","Nutmeg","Yorgurt" 4가지 뿐이다.
-"Onion","Eggs","Nutmeg","Yorgurt" 4가지 모두가 높은 양의 상관관계를 가지고 있어 유통에 문제가 생긴다면 서로 대체가 가능
-뿐만 아니라 묶음으로 팔기도 좋아 보인다.
-음의 상관관계를 가지는 값은 ["Milk", "Eggs"], ["Eggs", "Yorgurt"]가 있다.
+- 위에서 했던 과정을 새로운 데이터셋으로 다시 복습하는 과정이다.
+
+- minsup의 값을 0.2로 하면 많은 데이터가 출력돼 0.4로 조정
+    - 지지도가 0.4였던 corn은 향상도가 1을 넘지 못해 출력되지 않았다.
+- Milk가 들어간 빈발 항목 집합은 모두 향상도가 1에 가까운 수치를 출력했고 향상도의 수치가 높은 목록들은 "Onion","Eggs","Nutmeg","Yorgurt" 4가지 뿐이다.
+- "Onion","Eggs","Nutmeg","Yorgurt" 4가지 모두가 높은 양의 상관관계를 가지고 있어 유통에 문제가 생긴다면 서로 대체가 가능할 뿐만 아니라 묶음으로 팔기도 좋아 보인다.
+- 음의 상관관계를 가지는 값은 ["Milk", "Eggs"], ["Eggs", "Yorgurt"]가 있다.
+- 음의 상관관계와 양의 상관관계가 중복되는 값이 있는데 그렇다면 [ "Onion","Eggs","Nutmeg"] 혹은 ["Onion","Nutmeg","Yorgurt"]의 형식으로 묶어서 판다면 괜찮을 것 같다.
 ```
