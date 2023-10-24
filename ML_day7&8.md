@@ -389,3 +389,27 @@ res = association_rules(freq_itemsets, metric = "lift")
 res[res["lift"] > 1]
 ```
 - 지지도가 0.5이상인 값만을 남기고
+
+```python
+dataset = [['Milk', 'Onion', 'Nutmeg', 'Eggs', 'Yogurt'],
+           ['Onion', 'Nutmeg', 'Eggs', 'Yogurt'],
+           ['Milk', 'Apple', 'Eggs'],
+           ['Milk', 'Unicorn', 'Corn', 'Yogurt'],
+           ['Corn', 'Onion', 'Onion', 'Ice cream', 'Eggs']]
+te = TransactionEncoder()
+te_ary = te.fit(dataset)
+te_ary = te_ary.transform(dataset)
+df = pd.DataFrame(te_ary, columns = te.columns_)
+freq_itemsets = apriori(df, min_support=0.4, use_colnames=True)
+res = association_rules(freq_itemsets, metric = "lift")
+res[res["lift"] < 1]
+```
+```python
+minsup의 값을 0.2로 하면 많은 데이터가 출력돼 0.4로 조정
+-> 지지도가 0.4였던 corn은 향상도가 1을 넘지 못해 출력되지 않았다.
+Milk가 들어간 빈발 항목 집합은 모두 향상도가 1에 가까운 수치를 출력했고 
+향상도의 수치가 높은 목록들은 "Onion","Eggs","Nutmeg","Yorgurt" 4가지 뿐이다.
+"Onion","Eggs","Nutmeg","Yorgurt" 4가지 모두가 높은 양의 상관관계를 가지고 있어 유통에 문제가 생긴다면 서로 대체가 가능
+뿐만 아니라 묶음으로 팔기도 좋아 보인다.
+음의 상관관계를 가지는 값은 ["Milk", "Eggs"], ["Eggs", "Yorgurt"]가 있다.
+```
