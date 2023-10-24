@@ -413,4 +413,4 @@ res[res["lift"] < 1]
 - "Onion","Eggs","Nutmeg","Yorgurt" 4가지 모두가 높은 양의 상관관계를 가지고 있어 유통에 문제가 생긴다면 서로 대체가 가능할 뿐만 아니라 묶음으로 팔기도 좋아 보인다.
 - 음의 상관관계를 가지는 값은 ["Milk", "Eggs"], ["Eggs", "Yorgurt"]가 있다.
 - 음의 상관관계와 양의 상관관계가 중복되는 값이 있는데 그렇다면 [ "Onion","Eggs","Nutmeg"] 혹은 ["Onion","Nutmeg","Yorgurt"]의 형식으로 묶어서 판다면 괜찮을 것 같다.
-```
+- 달걀은 지지도가 0.8 개별로 팔아도 충분히 잘 팔리니 [ "Onion","Eggs","Nutmeg"] 보다는  [ "Onion","Nutmeg","Yorgurt"]쪽이 판매에 더 강세를 보일 수 있다고 생각한다.
