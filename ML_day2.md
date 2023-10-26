@@ -166,7 +166,7 @@ pred = gs.predict(xtest)
         - gs를 xtrain과 ytrain으로 실행해 최고 정확도와, 파라미터 조정으로 가장 좋은 성능을 보인 모델을 반환한다.
             - 0.8781100992088462
                 KNeighborsClassifier(n_neighbors=17)
-    -KNN을 훈련시킨 모델에 xtest를 넣어 값을 출력했다.
+    - KNN을 훈련시킨 모델에 xtest를 넣어 값을 출력했다.
 
 ```python
 pd.DataFrame({'PassengerId': testCopy["PassengerId"], "Survived":pred}).to_csv("knn_submission.csv", index = False)
