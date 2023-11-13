@@ -28,7 +28,7 @@ xtrain, ytrain으로 model을 생성하고 x test를 이용해서 predict값을 
 CV를 기반으로 하는 stacking : 각각의 모델이 교차 검증 방식으로 학습 데이터를 생성한다.  
 """
 ```
-- 오늘 배운 배깅과 부스팅 그리고 보팅과 스태킹이ㅣ다
+- 오늘 배운 배깅과 부스팅 그리고 보팅과 스태킹이다
 
 ```python
 import pandas as pd
