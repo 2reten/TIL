@@ -142,7 +142,9 @@ df["year"].value_counts() # 2015
 pip install apyori
 import apyori
 ```
-- 새로 배우게 된 모듈이다. 이 모듈이 교수님은 TransactionEncoder보다 편하다고 하셨지만 나는 아니었다.
+- 새로 배우게 된 모듈이다.
+    - apyori는 연관 규칙 학습 라이브러리로 데이터 집합에서 항목 간의 관계를 찾아내는 기술 중 하나이다.
+    - 소비자의 구매 기록과 같은 데이터에서 특정 항목들 간의 연관성을 찾아내어 규칙으로 제시하는 등의 용도로 사용된다.
 
 ``` python
 df_time = pd.DataFrame(df.groupby("Date")["itemDescription"].nunique().index)
